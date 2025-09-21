@@ -1,0 +1,22 @@
+[workspace]
+authors = ["Zend <ZendWang040302@outlook.com>"]
+channels = ["conda-forge"]
+name = "okx-quant"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "==3.12"
+
+[pypi-dependencies]
+python-dotenv = ">=1.1.1, <2"
+pandas = ">=2.3.2, <3"
+numpy = ">=2.3.3, <3"
+xgboost = ">=3.0.5, <4"
+scikit-learn = ">=1.7.2, <2"
+websockets = ">=15.0.1, <16"
+matplotlib = ">=3.10.6, <4"
+python-okx = ">=0.4.0, <0.5"
+httpx = { version = ">=0.28.1, <0.29", extras = ["socks"] }
