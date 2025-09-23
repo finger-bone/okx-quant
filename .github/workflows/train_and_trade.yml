@@ -53,7 +53,7 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git add models/
+          git add *
           git commit -m "Update trained models" || echo "No changes to commit"
           git push
 

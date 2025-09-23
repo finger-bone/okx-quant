@@ -19,4 +19,3 @@ if __name__ == "__main__":
         ml_model.save(model_filename)
         
         logger.info(f"Model for {symbol} saved as {model_filename}")
-        logger.info(df[["timestamp","close","pred_return","signal"]].tail())
