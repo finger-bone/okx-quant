@@ -58,11 +58,11 @@ class LiveTrader:
                 if position_change > 0:
                     # 买入
                     logger.info(f"买入 {symbol}: 信号={signal}, 价格={price:.4f}, 数量={amount:.6f}")
-                    # self.fetcher.exchange.create_market_buy_order(symbol, amount)
+                    self.fetcher.exchange.create_market_buy_order(symbol, amount)
                 elif position_change < 0:
                     # 卖出
                     logger.info(f"卖出 {symbol}: 信号={signal}, 价格={price:.4f}, 数量={amount:.6f}")
-                    # self.fetcher.exchange.create_market_sell_order(symbol, amount)
+                    self.fetcher.exchange.create_market_sell_order(symbol, amount)
                     
                 # 更新仓位跟踪器
                 self.position_tracker[symbol] = target_position
