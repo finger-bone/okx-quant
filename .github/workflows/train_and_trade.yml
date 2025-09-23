@@ -1,0 +1,98 @@
+name: Train Models and Live Trading
+
+on:
+  schedule:
+    # 每周日凌晨1点训练模型
+    - cron: '0 1 * * 1'
+    # 每4小时进行一次实盘交易
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  train-models:
+    name: Train Models
+    if: github.event.schedule == '0 1 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Train models
+        env:
+          OKX_API_KEY: ${{ secrets.OKX_API_KEY }}
+          OKX_API_SECRET: ${{ secrets.OKX_API_SECRET }}
+          OKX_API_PASSPHRASE: ${{ secrets.OKX_API_PASSPHRASE }}
+          OKX_FLAG: ${{ secrets.OKX_FLAG || '1' }}
+          SYMBOLS: ${{ secrets.SYMBOLS || 'BTC-USDT,ETH-USDT' }}
+          WEIGHTS: ${{ secrets.WEIGHTS || '0.5,0.5' }}
+          LOOKBACK_DAYS: ${{ secrets.LOOKBACK_DAYS || '120' }}
+          TIMEFRAME: ${{ secrets.TIMEFRAME || '4h' }}
+          ORDER_USDT_BASE: ${{ secrets.ORDER_USDT_BASE || '50' }}
+        run: |
+          python main_train.py
+
+      - name: Commit and push models
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add models/
+          git commit -m "Update trained models" || echo "No changes to commit"
+          git push
+
+  live-trade:
+    name: Live Trading
+    if: github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run live trading
+        env:
+          OKX_API_KEY: ${{ secrets.OKX_API_KEY }}
+          OKX_API_SECRET: ${{ secrets.OKX_API_SECRET }}
+          OKX_API_PASSPHRASE: ${{ secrets.OKX_API_PASSPHRASE }}
+          OKX_FLAG: ${{ secrets.OKX_FLAG || '1' }}
+          SYMBOLS: ${{ secrets.SYMBOLS || 'BTC-USDT,ETH-USDT' }}
+          WEIGHTS: ${{ secrets.WEIGHTS || '0.5,0.5' }}
+          LOOKBACK_DAYS: ${{ secrets.LOOKBACK_DAYS || '120' }}
+          TIMEFRAME: ${{ secrets.TIMEFRAME || '4h' }}
+          ORDER_USDT_BASE: ${{ secrets.ORDER_USDT_BASE || '50' }}
+        run: |
+          python main_live.py
