@@ -37,7 +37,7 @@ jobs:
       
       - name: Remove old models
         run: |
-          rm model_*.pkl
+          rm -f model_*.pkl
 
       - name: Train models
         env:
